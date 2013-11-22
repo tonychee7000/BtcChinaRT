@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
-from PyQt4 import QtGui,QtCore
-import json,urllib.request,random,sys
+from PyQt4 import QtGui, QtCore
+import json
+import urllib.request
+import random
+import sys
 
 
 class Label(QtGui.QMainWindow):
