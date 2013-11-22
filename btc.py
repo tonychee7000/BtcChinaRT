@@ -9,8 +9,10 @@ import sys
 
 class Label(QtGui.QMainWindow):
     def __init__(self):
+        self.TITLE = "BtcChina实时报价"
         QtGui.QWidget.__init__(self)
-        self.setWindowTitle("BtcChina实时报价")
+        self.setWindowTitle(self.TITLE)
+        self.move(100,200)
         self.resize(300, 100)
         self.label = QtGui.QLabel("OK")
         self.label.setStyleSheet("font-size:48pt")
@@ -23,6 +25,7 @@ class Label(QtGui.QMainWindow):
     def setLabel(self):
         a = self.getValue()
         self.label.setText("￥{0}".format(a))
+        self.setWindowTitle("￥{0}|{1}".format(a, self.TITLE))
 
     def getValue(self):
         i = random.random()
