@@ -1,45 +1,47 @@
 #!/usr/bin/env python3
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 import json
 import urllib.request
 import random
 import sys
 
+
 class Timer(QtCore.QThread):
     trigger = QtCore.pyqtSignal(int)
-    def __init__(self, parent = None):
+
+    def __init__(self, parent=None):
         QtCore.QThread.__init__(self, parent)
         self.interval = 0
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.tc)
 
-    def setup(self, thread_no = 1, interval = 0):
+    def setup(self, thread_no=1, interval=0):
         self.thread_no = thread_no
         self.interval = interval
-    
+
     def run(self):
         self.timer.start(self.interval)
 
     @QtCore.pyqtSlot()
     def tc(self):
         self.trigger.emit(self.thread_no)
-        
 
-class Label(QtGui.QMainWindow):
+
+class Label(QtWidgets.QMainWindow):
     def __init__(self):
         self.TITLE = "BtcChina实时报价"
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         self.setWindowTitle(self.TITLE)
         self.move(100, 200)
         self.resize(300, 100)
-        self.label = QtGui.QLabel("Loading...")
+        self.label = QtWidgets.QLabel("Loading...")
         self.label.setStyleSheet("font-size:48pt")
         self.setCentralWidget(self.label)
         self.b = 0
         timer = Timer(self)
         timer.trigger.connect(self.setLabel)
-        timer.setup(interval = 8090)
+        timer.setup(interval=8090)
         timer.start()
 
     @QtCore.pyqtSlot()
@@ -70,7 +72,7 @@ class Label(QtGui.QMainWindow):
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     label = Label()
     label.show()
     app.exec_()
