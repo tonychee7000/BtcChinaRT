@@ -5,22 +5,26 @@ import json
 import urllib.request
 import random
 import sys
-import time
 
 class Timer(QtCore.QThread):
     trigger = QtCore.pyqtSignal(int)
     def __init__(self, parent = None):
-        QtCore.QThread.__init__(self,parent)
+        QtCore.QThread.__init__(self, parent)
         self.interval = 0
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.tc)
 
     def setup(self, thread_no = 1, interval = 0):
         self.thread_no = thread_no
         self.interval = interval
-
+    
     def run(self):
-        time.sleep(self.interval)
-        self.trigger.emit(self.thread_no)
+        self.timer.start(self.interval)
 
+    @QtCore.pyqtSlot()
+    def tc(self):
+        self.trigger.emit(self.thread_no)
+        
 
 class Label(QtGui.QMainWindow):
     def __init__(self):
@@ -35,7 +39,7 @@ class Label(QtGui.QMainWindow):
         self.b = 0
         timer = Timer(self)
         timer.trigger.connect(self.setLabel)
-        timer.setup(interval = 8.090)
+        timer.setup(interval = 8090)
         timer.start()
 
     @QtCore.pyqtSlot()
