@@ -27,12 +27,12 @@ class Label(QtGui.QMainWindow):
         self.TITLE = "BtcChina实时报价"
         QtGui.QWidget.__init__(self)
         self.setWindowTitle(self.TITLE)
-        self.move(100,200)
+        self.move(100, 200)
         self.resize(300, 100)
         self.label = QtGui.QLabel("Loading...")
         self.label.setStyleSheet("font-size:48pt")
         self.setCentralWidget(self.label)
-        self.b=0
+        self.b = 0
         timer = Timer(self)
         timer.trigger.connect(self.setLabel)
         timer.setup(interval = 8.090)
