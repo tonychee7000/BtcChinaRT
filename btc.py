@@ -14,7 +14,7 @@ class Label(QtGui.QMainWindow):
         self.setWindowTitle(self.TITLE)
         self.move(100,200)
         self.resize(300, 100)
-        self.label = QtGui.QLabel("OK")
+        self.label = QtGui.QLabel("Loading...")
         self.label.setStyleSheet("font-size:48pt")
         self.setCentralWidget(self.label)
         timer = QtCore.QTimer(self)
