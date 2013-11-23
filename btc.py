@@ -5,6 +5,21 @@ import json
 import urllib.request
 import random
 import sys
+import time
+
+class Timer(QtCore.QThread):
+    trigger = QtCore.pyqtSignal(int)
+    def __init__(self, parent = None):
+        QtCore.QThread.__init__(self,parent)
+        self.interval = 0
+
+    def setup(self, thread_no = 1, interval = 0):
+        self.thread_no = thread_no
+        self.interval = interval
+
+    def run(self):
+        time.sleep(self.interval)
+        self.trigger.emit(self.thread_no)
 
 
 class Label(QtGui.QMainWindow):
@@ -17,10 +32,11 @@ class Label(QtGui.QMainWindow):
         self.label = QtGui.QLabel("Loading...")
         self.label.setStyleSheet("font-size:48pt")
         self.setCentralWidget(self.label)
-        timer = QtCore.QTimer(self)
-        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self, QtCore.SLOT("setLabel()"))
-        timer.start(8090)
         self.b=0
+        timer = Timer(self)
+        timer.trigger.connect(self.setLabel)
+        timer.setup(interval = 8.090)
+        timer.start()
 
     @QtCore.pyqtSlot()
     def setLabel(self):
