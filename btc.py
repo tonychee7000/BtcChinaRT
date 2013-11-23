@@ -20,12 +20,21 @@ class Label(QtGui.QMainWindow):
         timer = QtCore.QTimer(self)
         QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self, QtCore.SLOT("setLabel()"))
         timer.start(8090)
+        self.b=0
 
     @QtCore.pyqtSlot()
     def setLabel(self):
         a = self.getValue()
         self.label.setText("￥{0}".format(a))
+        try:
+            if a > self.b:
+                self.label.setStyleSheet("font-size:48pt;color:red")
+            elif a < self.b:
+                self.label.setStyleSheet("font-size:48pt;color:green")
+        except:
+            pass
         self.setWindowTitle("￥{0}|{1}".format(a, self.TITLE))
+        self.b = a
 
     def getValue(self):
         i = random.random()
