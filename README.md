@@ -5,6 +5,6 @@ BtcChinaRT
 
 需要:
 python3
-python3-pyqt4
+python3-pyqt5
 python3-json
 
