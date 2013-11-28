@@ -89,21 +89,21 @@ class Window(QtWidgets.QWidget):
             jso = json.loads(b.decode("utf8"))
             return jso["ticker"]
         except:
-            return None
+            pass
 
 class Graphs(QtWidgets.QWidget):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.setMinimumSize(300,300)
-        self.isFirst = True
-        self.xPrev = self.width() * 0.05
-        self.xCur = self.width() * 0.05
-        self.valuePrev= self.height()
-        self.valueCur = self.height()
-        label = QtWidgets.QLabel("10k", self)
-        label.move(0,self.height() * 0.03)
-        label = QtWidgets.QLabel("0", self)
-        label.move(0,self.height() * 0.83)
+        self.recentData = []
+        self.max_ = 10000
+        self.min_ = 0
+        self.posit = len(range(int(self.width() * 0.03), int(self.width() * 0.99), 10))
+        self.xPrev = self.width() * 0.01
+        self.label1 = QtWidgets.QLabel("10k", self)
+        self.label1.move(0,self.height() * 0.03)
+        self.label2 = QtWidgets.QLabel("0", self)
+        self.label2.move(0,self.height() * 0.83)
     
     def paintEvent(self, event):
         painter = QtGui.QPainter()
@@ -117,7 +117,15 @@ class Graphs(QtWidgets.QWidget):
     def draw(self, event, painter):
         pen = QtGui.QPen(QtGui.QColor(0, 0, 0), 1, QtCore.Qt.SolidLine)
         painter.setPen(pen)
-        painter.drawLine(self.xPrev, self.valuePrev, self.xCur, self.valueCur)
+        valuePrev = self.height()
+        xPrev = self.width() * 0.03
+        xCur = self.width() * 0.03
+        for value in self.recentData:
+            xCur += 10
+            painter.drawLine(xPrev, valuePrev, xCur, value)
+            valuePrev = value
+            xPrev = xCur
+
 
     def drawFrame(self, event, painter):
         painter.setPen(QtGui.QColor(0, 0, 0))
@@ -131,18 +139,19 @@ class Graphs(QtWidgets.QWidget):
             painter.drawLine(self.width() * 0.05, self.height() * 0.05 * h, self.width() , self.height() * 0.05 *h)
 
     def addPoint(self, value):
-        self.xPrev = self.xCur
-        self.valuePrev = self.valueCur
-        if self.xCur >= self.width() * 0.95:
-            self.xCur = self.width() * 0.05
-            self.xPrev = self.width() * 0.05
-            self.valuePrev = self.height()
-            self.valueCur = 0
-        self.xCur += 10
         value = float(value)
-        self.valueCur = int((1.0 - value / 10000) * self.height() * 0.8 + self.height() * 0.05)
+        valueCur = int((1.0 - value / (self.max_ - self.min_)) * self.height() * 0.8 + self.height() * 0.05)
+        self.recentData.append(valueCur)
+        if len(self.recentData) > self.posit:
+            self.setPeak(max(self.recentData), min(self.recentData))
+            del self.recentData[0]
         self.update()
-        print("DEB:{0}, {1}, {2}, {3}".format(self.xPrev, self.valuePrev, self.xCur, self.valueCur))
+
+    def setPeak(self, max_, min_):
+        self.max_ = max_
+        self.min_ = min_
+        self.label1.setText = max_
+        self.label2.setText = min_
 
 
 def main():
