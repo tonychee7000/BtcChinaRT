@@ -1,4 +1,20 @@
 #!/usr/bin/env python3
+#
+# Copyright (C) 2013 - Tony Chyi <tonychee1989@gmail.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 import json
@@ -31,7 +47,7 @@ class Timer(QtCore.QThread):
 class Window(QtWidgets.QWidget):
     def __init__(self):
         self.TITLE = "BtcChina实时报价"
-        self.b = 0
+        self.valPrev = 0
 
         QtWidgets.QWidget.__init__(self)
         self.setWindowTitle(self.TITLE)
@@ -65,20 +81,20 @@ class Window(QtWidgets.QWidget):
 
     @QtCore.pyqtSlot()
     def setLabel(self):
-        a = self.getValue()
-        self.label1.setText("￥{0}".format(a["last"]))
-        self.label2.setText("High:\t￥{0}\nLow:\t￥{1}\nBuy:\t￥{2}\nSell:\t￥{3}".format(a["high"], a["low"], a["buy"], a["sell"]))
-        self.graph.addPoint(a["last"])
+        val = self.getValue()
         try:
-            if a["last"] > self.b:
+            self.label1.setText("￥{0}".format(val["last"]))
+            self.label2.setText("High:\t￥{0}\nLow:\t￥{1}\nBuy:\t￥{2}\nSell:\t￥{3}".format(val["high"], val["low"], val["buy"], val["sell"]))
+            self.graph.addPoint(a["last"])
+            if val["last"] > self.valPrev:
                 self.label1.setStyleSheet("font-size:50px;color:red")
-            elif a["last"] < self.b:
+            elif val["last"] < self.valPrev:
                 self.label1.setStyleSheet("font-size:50px;color:green")
+            self.setWindowTitle("￥{0}|{1}".format(val["last"], self.TITLE))
+            self.valPrev = val["last"]
         except:
             pass
-        self.setWindowTitle("￥{0}|{1}".format(a["last"], self.TITLE))
-        self.b = a["last"]
-
+        
     def getValue(self):
         i = random.random()
         url = "http://info.btc123.com/lib/jsonProxyEx.php?type=btcchinaTicker&suffix={0}".format(i)
