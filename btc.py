@@ -153,6 +153,9 @@ class Graphs(QtWidgets.QWidget):
         self.label1.setText = max_
         self.label2.setText = min_
 
+    def setStep(self, step):
+        self.posit = len(range(int(self.width() * 0.03), int(self.width() * 0.99), step))
+
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
