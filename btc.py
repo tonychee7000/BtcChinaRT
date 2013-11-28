@@ -99,13 +99,12 @@ class Graphs(QtWidgets.QWidget):
         self.recentData = []
         self.max_ = 10000
         self.min_ = 0
-        self.step = 10
-        self.posit = len(range(int(self.width() * 0.03), int(self.width() * 0.99), self.step))
         self.xPrev = self.width() * 0.01
         self.label1 = QtWidgets.QLabel("10k", self)
         self.label1.move(0, self.height() * 0.03)
         self.label2 = QtWidgets.QLabel("0", self)
         self.label2.move(0, self.height() * 0.83)
+        self.setStep(10)
 
     def paintEvent(self, event):
         painter = QtGui.QPainter()
