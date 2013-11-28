@@ -98,6 +98,7 @@ class Graphs(QtWidgets.QWidget):
         self.recentData = []
         self.max_ = 10000
         self.min_ = 0
+        self.step = 10
         self.posit = len(range(int(self.width() * 0.03), int(self.width() * 0.99), 10))
         self.xPrev = self.width() * 0.01
         self.label1 = QtWidgets.QLabel("10k", self)
@@ -121,7 +122,7 @@ class Graphs(QtWidgets.QWidget):
         xPrev = self.width() * 0.03
         xCur = self.width() * 0.03
         for value in self.recentData:
-            xCur += 10
+            xCur += self.step
             painter.drawLine(xPrev, valuePrev, xCur, value)
             valuePrev = value
             xPrev = xCur
@@ -154,6 +155,7 @@ class Graphs(QtWidgets.QWidget):
         self.label2.setText = min_
 
     def setStep(self, step):
+        self.step = step
         self.posit = len(range(int(self.width() * 0.03), int(self.width() * 0.99), step))
 
 
