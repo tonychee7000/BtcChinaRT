@@ -118,11 +118,13 @@ class Graphs(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
+        self.flagFirst = True
         self.setMinimumSize(300, 300)
         self.recentData = []  # To draw lines, a list is needed
         self.max_ = 10000
         self.min_ = 0
-        self.xPrev = self.width() * 0.01
+        self.valuePrev = self.height()
+        self.mousePosit = QtCore.QPoint(0, 0)
         self.label1 = QtWidgets.QLabel("10k", self)
         self.label1.move(0, self.height() * 0.03)
         self.label2 = QtWidgets.QLabel("0", self)
@@ -134,6 +136,7 @@ class Graphs(QtWidgets.QWidget):
         painter.begin(self)
         self.drawGird(event, painter)
         self.drawFrame(event, painter)
+        self.drawMouse(event, painter)
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
         self.draw(event, painter)
         painter.end()
@@ -143,13 +146,12 @@ class Graphs(QtWidgets.QWidget):
 
         pen = QtGui.QPen(QtGui.QColor(0, 0, 0), 1, QtCore.Qt.SolidLine)
         painter.setPen(pen)
-        valuePrev = self.height()
         xPrev = self.width() * 0.10
         xCur = self.width() * 0.10
         for value in self.recentData:
             xCur += self.step
-            painter.drawLine(xPrev, valuePrev, xCur, value)
-            valuePrev = value
+            painter.drawLine(xPrev, self.valuePrev, xCur, value)
+            self.valuePrev = value
             xPrev = xCur
 
     def drawFrame(self, event, painter):
@@ -167,11 +169,20 @@ class Graphs(QtWidgets.QWidget):
         for h in range(1, 100):
             painter.drawLine(self.width() * 0.10, self.height() * 0.05 * h, self.width(), self.height() * 0.05 * h)
 
+    def drawMouse(self, event, painter):
+        if self.mousePosit in QtCore.QRect(self.width() * 0.1, self.height() * 0.05, self.width() * 0.9, self.height() * 0.95):
+            painter.setPen(QtGui.QColor(255, 0, 255))
+            painter.drawLine(self.mousePosit.x(), self.height() * 0.05, self.mousePosit.x(), self.height())
+            painter.drawLine(self.width() * 0.10, self.mousePosit.y(), self.width(), self.mousePosit.y())
+            price = float((1 - (self.mousePosit.y() - self.height() * 0.05) / (self.height() * 0.95)) * (self.max_ - self.min_) + self.min_)
+            painter.setPen(QtGui.QColor(0, 0, 255))
+            painter.drawText(QtCore.QPoint(self.width() * 0.1, self.mousePosit.y()), format(price, '.2f'))
+
     def addPoint(self, value):
         """Append a data to data list, for drawing lines."""
 
         value = float(value)
-        valueCur = int((1.0 - (value - self.min_) / (self.max_ - self.min_)) * self.height() * 0.8 + self.height() * 0.05)
+        valueCur = int((1.0 - (value - self.min_) / (self.max_ - self.min_)) * self.height() * 0.95 + self.height() * 0.05)
         self.recentData.append(valueCur)
         if len(self.recentData) >= self.posit:
             del self.recentData[0]  # Del the first data, look like the chart moving.
@@ -194,6 +205,10 @@ class Graphs(QtWidgets.QWidget):
         step = int(step)
         self.step = step
         self.posit = len(range(int(self.width() * 0.10), int(self.width() * 0.75), step))
+
+    def mouseMoveEvent(self, event):
+        self.mousePosit = event.pos()
+        self.update()
 
 
 def main():
