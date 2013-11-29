@@ -25,7 +25,7 @@ import sys
 class Timer(QtCore.QThread):
     """Run QTimer in another thread."""
 
-    trigger = QtCore.pyqtSignal(int)
+    trigger = QtCore.pyqtSignal(int, dict)
 
     def __init__(self, parent=None):
         QtCore.QThread.__init__(self, parent)
@@ -39,10 +39,27 @@ class Timer(QtCore.QThread):
 
     def run(self):
         self.timer.start(self.interval)
-
     @QtCore.pyqtSlot()
     def tc(self):
-        self.trigger.emit(self.thread_no)
+        try:
+            val = self.getValue()
+            self.trigger.emit(self.thread_no, val)
+        except TypeError as err:
+            print('\033[31;1mERR:\033[0m', err)
+
+    def getValue(self):
+        """This is used for get json from specified address."""
+
+        url = "https://data.btcchina.com/data/ticker"
+        try:
+            p_conn = urllib.request.urlopen(url)
+            b = p_conn.read()
+            p_conn.close()
+            jso = json.loads(b.decode("utf8"))
+            return jso["ticker"]
+        except:
+            return None
+
 
 
 class Window(QtWidgets.QWidget):
@@ -81,9 +98,8 @@ class Window(QtWidgets.QWidget):
         timer.setup(interval=10000)
         timer.start()
 
-    @QtCore.pyqtSlot()
-    def setLabel(self):
-        val = self.getValue()
+    @QtCore.pyqtSlot(int, dict)
+    def setLabel(self, thread_no, val):
         try:
             self.label1.setText("￥{0}".format(val["last"]))
             self.label2.setText("High:\t￥{0}\nLow:\t￥{1}\nBuy:\t￥{2}\nSell:\t￥{3}".format(val["high"], val["low"], val["buy"], val["sell"]))
@@ -95,20 +111,6 @@ class Window(QtWidgets.QWidget):
                 self.label1.setStyleSheet("font-size:50px;color:green")  # Damn bear market!
             self.setWindowTitle("￥{0}|{1}".format(val["last"], self.TITLE))
             self.valPrev = float(val["last"])
-        except Exception as err:
-            print('\033[31;1mERR:\033[0m', err)
-            pass
-
-    def getValue(self):
-        """This is used for get json from specified address."""
-
-        url = "https://data.btcchina.com/data/ticker"
-        try:
-            p_conn = urllib.request.urlopen(url)
-            b = p_conn.read()
-            p_conn.close()
-            jso = json.loads(b.decode("utf8"))
-            return jso["ticker"]
         except:
             pass
 
