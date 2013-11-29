@@ -31,7 +31,7 @@ class Timer(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         self.interval = 0
         self.timer = QtCore.QTimer(self)
-        self.timer.timeout.connect(self.tc)
+        self.timer.timeout.connect(self.__tc)
 
     def setup(self, thread_no=1, interval=0):
         self.thread_no = thread_no
@@ -40,14 +40,14 @@ class Timer(QtCore.QThread):
     def run(self):
         self.timer.start(self.interval)
     @QtCore.pyqtSlot()
-    def tc(self):
+    def __tc(self):
         try:
-            val = self.getValue()
+            val = self.__getValue()  # TODO:import threading ok?
             self.trigger.emit(self.thread_no, val)
         except TypeError as err:
             print('\033[31;1mERR:\033[0m', err)
 
-    def getValue(self):
+    def __getValue(self):
         """This is used for get json from specified address."""
 
         url = "https://data.btcchina.com/data/ticker"
@@ -136,14 +136,14 @@ class Graphs(QtWidgets.QWidget):
     def paintEvent(self, event):
         painter = QtGui.QPainter()
         painter.begin(self)
-        self.drawGird(event, painter)
-        self.drawFrame(event, painter)
-        self.drawMouse(event, painter)
+        self.__drawGird(event, painter)
+        self.__drawFrame(event, painter)
+        self.__drawMouse(event, painter)
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
-        self.draw(event, painter)
+        self.__draw(event, painter)
         painter.end()
 
-    def draw(self, event, painter):
+    def __draw(self, event, painter):
         """Draw data line on widget."""
 
         pen = QtGui.QPen(QtGui.QColor(0, 0, 0), 1, QtCore.Qt.SolidLine)
@@ -156,13 +156,13 @@ class Graphs(QtWidgets.QWidget):
             self.valuePrev = value
             xPrev = xCur
 
-    def drawFrame(self, event, painter):
+    def __drawFrame(self, event, painter):
         """Draw the border of chart."""
 
         painter.setPen(QtGui.QColor(0, 0, 0))
         painter.drawRect(self.width() * 0.10, self.height() * 0.05, self.width() * 0.90, self.height() * 0.95)
 
-    def drawGird(self, event, painter):
+    def __drawGird(self, event, painter):
         """Draw gird on chart"""
 
         painter.setPen(QtGui.QColor(192, 192, 192))
@@ -171,7 +171,7 @@ class Graphs(QtWidgets.QWidget):
         for h in range(1, 100):
             painter.drawLine(self.width() * 0.10, self.height() * 0.05 * h, self.width(), self.height() * 0.05 * h)
 
-    def drawMouse(self, event, painter):
+    def __drawMouse(self, event, painter):
         if self.mousePosit in QtCore.QRect(self.width() * 0.1, self.height() * 0.05, self.width() * 0.9, self.height() * 0.95):
             painter.setPen(QtGui.QColor(255, 0, 255))
             painter.drawLine(self.mousePosit.x(), self.height() * 0.05, self.mousePosit.x(), self.height())
