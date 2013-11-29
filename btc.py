@@ -39,6 +39,7 @@ class Timer(QtCore.QThread):
 
     def run(self):
         self.timer.start(self.interval)
+
     @QtCore.pyqtSlot()
     def __tc(self):
         try:
@@ -59,7 +60,6 @@ class Timer(QtCore.QThread):
             return jso["ticker"]
         except:
             return None
-
 
 
 class Window(QtWidgets.QWidget):
