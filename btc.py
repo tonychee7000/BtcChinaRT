@@ -19,7 +19,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 import json
 import urllib.request
-import random
 import sys
 
 
@@ -76,7 +75,7 @@ class Window(QtWidgets.QWidget):
         # Start Get Data
         timer = Timer(self)
         timer.trigger.connect(self.setLabel)
-        timer.setup(interval=8090)
+        timer.setup(interval=10000)
         timer.start()
 
     @QtCore.pyqtSlot()
@@ -85,19 +84,20 @@ class Window(QtWidgets.QWidget):
         try:
             self.label1.setText("￥{0}".format(val["last"]))
             self.label2.setText("High:\t￥{0}\nLow:\t￥{1}\nBuy:\t￥{2}\nSell:\t￥{3}".format(val["high"], val["low"], val["buy"], val["sell"]))
-            self.graph.addPoint(a["last"])
-            if val["last"] > self.valPrev:
+            self.graph.setPeak(val["high"], val["low"])
+            self.graph.addPoint(val["last"])
+            if float(val["last"]) > self.valPrev:
                 self.label1.setStyleSheet("font-size:50px;color:red")
-            elif val["last"] < self.valPrev:
+            elif float(val["last"]) < self.valPrev:
                 self.label1.setStyleSheet("font-size:50px;color:green")
             self.setWindowTitle("￥{0}|{1}".format(val["last"], self.TITLE))
-            self.valPrev = val["last"]
-        except:
+            self.valPrev = float(val["last"])
+        except Exception as err:
+            print('\033[31;1mERR:\033[0m', err)
             pass
-        
+
     def getValue(self):
-        i = random.random()
-        url = "http://info.btc123.com/lib/jsonProxyEx.php?type=btcchinaTicker&suffix={0}".format(i)
+        url = "https://data.btcchina.com/data/ticker"
         try:
             p_conn = urllib.request.urlopen(url)
             b = p_conn.read()
@@ -135,8 +135,8 @@ class Graphs(QtWidgets.QWidget):
         pen = QtGui.QPen(QtGui.QColor(0, 0, 0), 1, QtCore.Qt.SolidLine)
         painter.setPen(pen)
         valuePrev = self.height()
-        xPrev = self.width() * 0.03
-        xCur = self.width() * 0.03
+        xPrev = self.width() * 0.10
+        xCur = self.width() * 0.10
         for value in self.recentData:
             xCur += self.step
             painter.drawLine(xPrev, valuePrev, xCur, value)
@@ -145,33 +145,37 @@ class Graphs(QtWidgets.QWidget):
 
     def drawFrame(self, event, painter):
         painter.setPen(QtGui.QColor(0, 0, 0))
-        painter.drawRect(self.width() * 0.05, self.height() * 0.05, self.width() * 0.95, self.height() * 0.95)
+        painter.drawRect(self.width() * 0.10, self.height() * 0.05, self.width() * 0.90, self.height() * 0.95)
 
     def drawGird(self, event, painter):
         painter.setPen(QtGui.QColor(192, 192, 192))
-        for v in range(1, 100):
+        for v in range(2, 100):
             painter.drawLine(self.width() * 0.05 * v, self.height() * 0.05, self.width() * 0.05 * v, self.height())
         for h in range(1, 100):
-            painter.drawLine(self.width() * 0.05, self.height() * 0.05 * h, self.width(), self.height() * 0.05 * h)
+            painter.drawLine(self.width() * 0.10, self.height() * 0.05 * h, self.width(), self.height() * 0.05 * h)
 
     def addPoint(self, value):
         value = float(value)
-        valueCur = int((1.0 - value / (self.max_ - self.min_)) * self.height() * 0.8 + self.height() * 0.05)
+        valueCur = int((1.0 - (value - self.min_) / (self.max_ - self.min_)) * self.height() * 0.8 + self.height() * 0.05)
         self.recentData.append(valueCur)
         if len(self.recentData) >= self.posit:
-            self.setPeak(max(self.recentData), min(self.recentData))
+            #self.setPeak(str(max(self.recentData)), str(min(self.recentData)))
             del self.recentData[0]
         self.update()
 
     def setPeak(self, max_, min_):
-        self.max_ = max_
-        self.min_ = min_
-        self.label1.setText = max_
-        self.label2.setText = min_
+        self.max_ = float(max_)
+        self.min_ = float(min_)
+        self.label1.setText(max_)
+        self.label1.adjustSize()
+        self.label2.setText(min_)
+        self.label2.adjustSize()
+        self.update()
 
     def setStep(self, step):
+        step = int(step)
         self.step = step
-        self.posit = len(range(int(self.width() * 0.03), int(self.width() * 0.99), step))
+        self.posit = len(range(int(self.width() * 0.10), int(self.width() * 0.75), step))
 
 
 def main():
