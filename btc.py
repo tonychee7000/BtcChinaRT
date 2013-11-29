@@ -93,10 +93,10 @@ class Window(QtWidgets.QWidget):
         self.setLayout(vbox)
 
         # Start Get Data
-        timer = Timer(self)
-        timer.trigger.connect(self.setLabel)
-        timer.setup(interval=10000)
-        timer.start()
+        #timer = Timer(self)
+        #timer.trigger.connect(self.setLabel)
+        #timer.setup(interval=10000)
+        #timer.start()
 
     @QtCore.pyqtSlot(int, dict)
     def setLabel(self, thread_no, val):
@@ -216,7 +216,11 @@ class Graphs(QtWidgets.QWidget):
 def main():
     app = QtWidgets.QApplication(sys.argv)
     win = Window()
+    timer = Timer()
+    timer.trigger.connect(win.setLabel)
     win.show()
+    timer.setup(interval=10000)
+    timer.start()
     app.exec_()
 
 if __name__ == "__main__":
