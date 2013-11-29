@@ -23,6 +23,8 @@ import sys
 
 
 class Timer(QtCore.QThread):
+    """Run QTimer in another thread."""
+
     trigger = QtCore.pyqtSignal(int)
 
     def __init__(self, parent=None):
@@ -54,6 +56,7 @@ class Window(QtWidgets.QWidget):
         self.setMinimumSize(500, 500)
         self.setMaximumSize(500, 500)
 
+        # Get ready for widget
         self.label1 = QtWidgets.QLabel("Loading...")
         self.label1.setStyleSheet("font-size:50px")
         self.label2 = QtWidgets.QLabel("Loading...")
@@ -87,9 +90,9 @@ class Window(QtWidgets.QWidget):
             self.graph.setPeak(val["high"], val["low"])
             self.graph.addPoint(val["last"])
             if float(val["last"]) > self.valPrev:
-                self.label1.setStyleSheet("font-size:50px;color:red")
+                self.label1.setStyleSheet("font-size:50px;color:red")  # WOW! Bull market!
             elif float(val["last"]) < self.valPrev:
-                self.label1.setStyleSheet("font-size:50px;color:green")
+                self.label1.setStyleSheet("font-size:50px;color:green")  # Damn bear market!
             self.setWindowTitle("￥{0}|{1}".format(val["last"], self.TITLE))
             self.valPrev = float(val["last"])
         except Exception as err:
@@ -97,6 +100,8 @@ class Window(QtWidgets.QWidget):
             pass
 
     def getValue(self):
+        """This is used for get json from specified address."""
+
         url = "https://data.btcchina.com/data/ticker"
         try:
             p_conn = urllib.request.urlopen(url)
@@ -109,10 +114,12 @@ class Window(QtWidgets.QWidget):
 
 
 class Graphs(QtWidgets.QWidget):
+    """A costomized controller, to show graph on the window."""
+
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.setMinimumSize(300, 300)
-        self.recentData = []
+        self.recentData = []  # To draw lines, a list is needed
         self.max_ = 10000
         self.min_ = 0
         self.xPrev = self.width() * 0.01
@@ -132,6 +139,8 @@ class Graphs(QtWidgets.QWidget):
         painter.end()
 
     def draw(self, event, painter):
+        """Draw data line on widget."""
+
         pen = QtGui.QPen(QtGui.QColor(0, 0, 0), 1, QtCore.Qt.SolidLine)
         painter.setPen(pen)
         valuePrev = self.height()
@@ -144,10 +153,14 @@ class Graphs(QtWidgets.QWidget):
             xPrev = xCur
 
     def drawFrame(self, event, painter):
+        """Draw the border of chart."""
+
         painter.setPen(QtGui.QColor(0, 0, 0))
         painter.drawRect(self.width() * 0.10, self.height() * 0.05, self.width() * 0.90, self.height() * 0.95)
 
     def drawGird(self, event, painter):
+        """Draw gird on chart"""
+
         painter.setPen(QtGui.QColor(192, 192, 192))
         for v in range(2, 100):
             painter.drawLine(self.width() * 0.05 * v, self.height() * 0.05, self.width() * 0.05 * v, self.height())
@@ -155,15 +168,18 @@ class Graphs(QtWidgets.QWidget):
             painter.drawLine(self.width() * 0.10, self.height() * 0.05 * h, self.width(), self.height() * 0.05 * h)
 
     def addPoint(self, value):
+        """Append a data to data list, for drawing lines."""
+
         value = float(value)
         valueCur = int((1.0 - (value - self.min_) / (self.max_ - self.min_)) * self.height() * 0.8 + self.height() * 0.05)
         self.recentData.append(valueCur)
         if len(self.recentData) >= self.posit:
-            #self.setPeak(str(max(self.recentData)), str(min(self.recentData)))
-            del self.recentData[0]
+            del self.recentData[0]  # Del the first data, look like the chart moving.
         self.update()
 
     def setPeak(self, max_, min_):
+        """Set the max/min value of the chart."""
+
         self.max_ = float(max_)
         self.min_ = float(min_)
         self.label1.setText(max_)
@@ -173,6 +189,8 @@ class Graphs(QtWidgets.QWidget):
         self.update()
 
     def setStep(self, step):
+        """Set the length of X to a line."""
+
         step = int(step)
         self.step = step
         self.posit = len(range(int(self.width() * 0.10), int(self.width() * 0.75), step))
